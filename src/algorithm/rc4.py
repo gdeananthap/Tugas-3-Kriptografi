@@ -40,17 +40,20 @@ def prga(text, s, mode="encrypt"):
         p = ''.join(chr(int(p[l:l+2], 16)) for l in range(0, len(p), 2))
         return p
 
+# Main Program
+def main():
+    key = input("Enter key: ")
+    p = input("Enter plaintext: ")
+    # encrypt
+    s = ksa(key)
+    c = prga(p, s)
+    print(c)
+    # decrypt
+    s = ksa(key)
+    p = prga(c, s, "decrypt")
+    print(p)
 
-
-# MAIN
-key = input("Enter key: ")
-p = input("Enter plaintext: ")
-# encrypt
-s = ksa(key)
-c = prga(p, s)
-print(c)
-# decrypt
-s = ksa(key)
-p = prga(c, s, "decrypt")
-print(p)
+# If module is being runned.
+if __name__ == "__main__":
+    main()
 
