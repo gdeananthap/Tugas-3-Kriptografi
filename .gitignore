@@ -130,3 +130,7 @@ dmypy.json
 
 # Vscode
 .vscode/
+
+# Virtual environment
+.src/virt/
+virt/
