@@ -1,0 +1,25 @@
+.navbar-crypto {
+    padding-top: 15px;
+
+    @include media-breakpoint-down(md) {
+        background-color: #fff !important;
+    }
+
+    .nav-item {
+        .nav-link {
+            @include media-breakpoint-up(lg) {
+                margin-left: 10px;
+                margin-right: 10px;
+            }
+        }
+    }
+
+    .creator-picture {
+        max-height: 45px;
+    }
+}
+
+.navbar-fixed-top.scrolled {
+    background-color: #fff !important;
+    transition: background-color 200ms linear;
+}

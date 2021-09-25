@@ -1,0 +1,11 @@
+<div class="border-right" id="sidebar-wrapper">
+	<div class="sidebar-heading text-center">
+		<img src="{{ url_for('static', filename='images/Crypto Logo.png') }}" alt=""
+			class="my-4 logo-crypto" />
+	</div>
+	<div class="list-group list-group-flush">
+		<a href="{{ url_for('rc4') }}" class="list-group-item list-group-item-action {{ 'active' if active_page == 'rc4'}}"> RC4 Cipher </a>
+		<a href="{{ url_for('imageStegano') }}" class="list-group-item list-group-item-action {{ 'active' if active_page == 'image_steganography'}}"> Image Steganography </a>
+		<a href="{{ url_for('audioStegano') }}" class="list-group-item list-group-item-action {{ 'active' if active_page == 'audio_steganography'}}"> Audio Steganography </a>
+	</div>
+</div>

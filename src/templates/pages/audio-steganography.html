@@ -1,0 +1,201 @@
+{% extends 'layouts/base.html' %} 
+{% set active_page = 'audio_steganography' %}
+
+{% block title %} 
+	Audio Steganography
+{% endblock %}
+
+{% block heading %} 
+		<h2 class="crypto-title">Audio Steganography</h2>
+		<p class="crypto-subtitle"> 
+			A technique used to transmit hidden information by modifying an audio signal in an imperceptible manner. It is the science of hiding some secret text or audio information in a host message.
+		</p>
+{% endblock %}
+
+{% block content %}
+	<ul class="nav nav-pills" id="cryptoTab" role="tablist">
+		<li class="nav-item" role="presentation">
+			<a class="nav-link {{ 'active' if embed }}" id="embed-tab" data-toggle="tab" href="#embed" 
+				role="tab" aria-controls="embed" aria-selected="false">Embed</a>
+		</li>
+		<li class="nav-item" role="presentation">
+			<a class="nav-link {{ 'active' if not embed }}" id="extract-tab" data-toggle="tab" href="#extract" 
+			role="tab" aria-controls="extract" aria-selected="true">Extract</a>
+		</li>
+	</ul>
+	<div class="tab-content" id="myTabContent">
+		<div class="tab-pane fade show {{ 'active' if embed }}" id="embed" role="tabpanel" aria-labelledby="embed-tab">
+			<div class="row mt-3">
+				<div class="col-12 mt-2">
+					<form action="{{ url_for('audioSteganoEmbed') }}" enctype="multipart/form-data" method="POST">
+						<div class="card">
+							<div class="card-body">
+								<div class="row">
+									{% if error %}
+										<div class="row col-12 mx-2 d-block">	
+											<div class="alert alert-danger alert-dismissible fade show" role="alert">
+													<i class="fa fa-times"> {{ error }}</i>
+													<button type="button" class="close" data-dismiss="alert" aria-label="Close">
+														<span aria-hidden="true">&times;</span>
+													</button>
+											</div>
+										</div>
+									{% endif %}
+									<div class="col-md-12">
+										<div class="form-group">
+											<div class="form-check form-check-inline">
+												<input class="form-check-input" type="radio" name="embed-method" id="embed-random"
+													value="random" checked>
+												<label class="form-check-label" for="embed-random">Embed with randomized
+													location</label>
+											</div>
+											<div class="form-check form-check-inline">
+												<input class="form-check-input" type="radio" name="embed-method" id="embed-lsb"
+													value="lsb">
+												<label class="form-check-label" for="embed-lsb">Embed with LSB method</label>
+											</div>
+										</div>
+									</div>
+									<div class="col-md-12">
+										<div class="form-group">
+											<div class="form-check form-check-inline">
+												<input class="form-check-input" type="radio" name="message-rc4" id="encrypt-message"
+													value="encrypt" checked>
+												<label class="form-check-label" for="embed-lsb">Encrypt message</label>
+											</div>
+											<div class="form-check form-check-inline">
+												<input class="form-check-input" type="radio" name="message-rc4" id="not-encrypt-message"
+													value="not-encrypt">
+												<label class="form-check-label" for="embed-random">Don't encrypt message</label>
+											</div>
+										</div>
+									</div>
+									<div class="col-md-12">
+										<div class="form-group">
+											<label for="file-audio">File Audio</label>
+											<input type="file" accept=".wav" class="form-control pt-1" id="file-audio"
+												aria-describedby="file-audio" name="file-audio" placeholder="basic audio" />
+										</div>
+									</div>
+									<div class="col-md-12">
+										<div class="form-group">
+											<label for="file-message">File Message</label>
+											<input type="file"  class="form-control pt-1" id="file-message" aria-describedby="file-message" 
+												name="file-message" placeholder="Message you want to hide" />
+										</div>
+									</div>
+									<div class="col-md-12">
+										<div class="form-group">
+											<label for="output-name">Name for output file [without extension]</label>
+											<input type="text" class="form-control" id="output-name" aria-describedby="output-name"
+												name="output-name" value="{{ form['output-name'] if form }}" />
+										</div>
+									</div>
+									<div class="col-md-12" id="key-encrypt-input">
+										<div class="form-group">
+											<label for="key-encrypt">Key for encrypting message</label>
+												<textarea name="key-encrypt" id="key-encrypt" cols="30" rows="1"class="form-control">{{ form['key-encrypt'] if form }}</textarea>
+										</div>
+									</div>
+									<div class="col-md-12" id="key-random-input">
+										<div class="form-group">
+											<label for="key-random">Key for randomizing location</label>
+											<textarea name="key-random" id="key-random" cols="30" rows="1" class="form-control">{{ form['key_random'] if form }}</textarea>
+										</div>
+									</div>
+								</div>
+							</div>
+						</div>
+						<div class="row mt-2">
+							<div class="col">
+								<button type="submit" class="mb-3 btn btn-success btn-block px-5"> Embed Now </button>
+							</div>
+						</div>
+					</form>
+				</div>
+			</div>
+			{% if psnr %}
+				<div class="row my-4">
+					<div class="col-12">
+						<div class="card">
+							<div class="card-body" style="padding-bottom: 0.5rem;">
+								<div class="row">
+									<div class="col-md-12">
+										<div class="form-group">
+											<label for="psnr">PSNR</label>
+											<input type="text" readonly value="The psnr of the audio is {{ psnr }}" class="form-control" id="psnr" aria-describedby="psnr" name="psnr">
+										</div>
+									</div>
+									<div class="col-md-12">
+										<div class="form-group">
+											<div class="form-control">
+												<i class="far fa-file-video fa-lg"> <a href="/download/{{ output_filename }}">{{output_filename}}</i> </a>
+											</div>
+										</div>
+									</div>
+								</div>
+							</div>
+						</div>
+					</div>
+				</div>
+			{% endif %}	
+		</div>
+		<div class="tab-pane fade show {{ 'active' if not embed }}" id="extract" role="tabpanel" aria-labelledby="extract-tab">
+			<div class="row mt-3">
+				<div class="col-12 mt-2">
+					<form action="{{ url_for('audioSteganoExtract') }}" enctype="multipart/form-data" method="POST">
+						<div class="card">
+							<div class="card-body">
+								<div class="row">
+									{% if error %}
+										<div class="row col-12 mx-2 d-block">	
+											<div class="alert alert-danger alert-dismissible fade show" role="alert">
+													<i class="fa fa-times"> {{ error }}</i>
+													<button type="button" class="close" data-dismiss="alert" aria-label="Close">
+														<span aria-hidden="true">&times;</span>
+													</button>
+											</div>
+										</div>
+									{% endif %}
+									<div class="col-md-12">
+										<div class="form-group">
+											<label for="file-stego-audio">File Stego-Audio</label>
+											<input type="file" accept=".wav" class="form-control pt-1" id="file-stego-audio"
+												aria-describedby="file-stego-audio" name="file-stego-audio" />
+										</div>
+									</div>
+									<div class="col-md-12">
+										<div class="form-group">
+											<label for="output-name">Name for output file [without extension]</label>
+											<input type="text" class="form-control" id="output-name" aria-describedby="output-name"
+												name="output-name" value="{{ form['output-name'] if form }}" />
+										</div>
+									</div>
+									<div class="col-md-12">
+										<div class="form-group">
+											<label for="key-encrypt">Key for encrypting message [if exist]</label>
+											<textarea name="key-encrypt" id="key-encrypt" cols="30" rows="1"
+												class="form-control">{{ form["key-encrypt"] if form }}</textarea>
+										</div>
+									</div>
+									<div class="col-md-12">
+										<div class="form-group">
+											<label for="key-random">Key for randomizing location [if exist]</label>
+											<textarea name="key-random" id="key-random" cols="30" rows="1"
+												class="form-control">{{ form["key_random"] if form }}</textarea>
+										</div>
+									</div>
+								</div>
+							</div>
+						</div>
+						<div class="row mt-2">
+							<div class="col">
+								<button type="submit" class="mb-3 btn btn-success btn-block px-5"> Extract Now </button>
+							</div>
+						</div>
+					</form>
+				</div>
+			</div>
+		</div>
+	</div>
+{% endblock %}

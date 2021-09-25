@@ -1,0 +1,55 @@
+<!DOCTYPE html>
+<html lang="en">
+
+	<head>
+		<meta charset="utf-8" />
+		<meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no" />
+		<meta name="description" content="" />
+		<meta name="author" content="" />
+		<title> 
+			{% block title %}
+
+			{% endblock %} 
+		</title>
+		<!-- Styling -->
+		{% include 'includes/style.html' %}
+	</head>
+
+	<body>
+		<div class="page-crypto">
+			<div class="d-flex" id="wrapper" data-aos="fade-right">
+				<!-- Sidebar -->
+				{% include 'includes/sidebar.html' %}
+				<!-- /#sidebar-wrapper -->
+				
+				<!-- Page Content -->
+				<div id="page-content-wrapper">
+					
+					<!-- Navbar -->
+					{% include 'includes/navbar.html' %}
+					<!-- /#navbar-wrapper -->
+
+					<div class="section-content section-dashboard-home" data-aos="fade-up">
+						<div class="container-fluid">
+							<div class="crypto-heading">
+								{% block heading %} 	
+
+								{% endblock %}
+							</div>
+							<div class="crypto-content">
+								{% block content %} 
+								
+								{% endblock %}
+							</div>
+						</div>
+					</div>
+				</div>
+				<!-- /#page-content-wrapper -->
+			</div>
+		</div>
+		<!-- Scripts -->
+		{% include 'includes/script.html' %}
+		
+	</body>
+
+</html>

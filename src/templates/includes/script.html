@@ -1,0 +1,19 @@
+<!-- Bootstrap core JavaScript -->
+<script src="{{ url_for('static', filename='vendor/jquery/jquery.slim.min.js') }}"></script>
+<script src="{{ url_for('static', filename='vendor/bootstrap/js/bootstrap.bundle.min.js') }}">
+</script>
+<script src="https://kit.fontawesome.com/7daea7707d.js" crossorigin="anonymous"></script>
+<script src="https://unpkg.com/aos@2.3.1/dist/aos.js"></script>
+<script>
+	AOS.init();
+</script>
+<!-- Utility -->
+<script src="{{ url_for('static', filename='script/utility.js') }}"></script>
+<!-- Menu Toggle Script -->
+<script>
+	// For toggling sidebar.
+	$("#menu-toggle").click(function (e) {
+		e.preventDefault();
+		$("#wrapper").toggleClass("toggled");
+	});
+</script>
