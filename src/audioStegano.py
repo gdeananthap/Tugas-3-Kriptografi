@@ -1,10 +1,12 @@
 # Python module.
-from io import FileIO
 import os
+import math
 from typing import List
 import wave
 import ntpath
+import numpy as np
 
+from io import FileIO
 from pathlib import Path
 
 # Own module.
@@ -54,6 +56,7 @@ class AudioStegano:
         audio = wave.open(audio_path, "r")
         if (not(audio)):
             raise Exception("Input audio not exist")
+       
 
         # Process audio input.
         self.audio = audio
@@ -76,6 +79,8 @@ class AudioStegano:
             # for input file extension and randomized, encrypt, start and endfile flag. 
             if len(self.message) > self.payload//8 - len(self.msg_extension) - 5:
                 raise Exception("Input message is to big")
+        
+        audio.close()
 
     def normalizeMessage(self, key:str, is_random:bool, is_encrypt:bool) -> str:
         """
@@ -239,6 +244,53 @@ class AudioStegano:
         new_file.close()
 
         return output_file_path
+    
+    @staticmethod
+    def calculatePSNR(audio_path:str, stego_audio_path:str) -> float:
+        """
+        Function to calculate psnr of two audio file. The original and the embedded audio.
+        Return float representing the psnr.
+
+        Parameter.
+        ----------
+        audio_path : str
+            Absolute path to audio file.
+        stego_audio_path : str
+         Absolute path to stego audio file.
+        """
+        # Validate if file exist.
+        try:
+            audio = wave.open(audio_path, 'rb')
+            stego_audio = wave.open(stego_audio_path, 'rb')
+        except:
+            raise Exception("File not exist")
+        
+        # Read both file frame and store the data in bytearray.
+        # Read audio data.
+        audio_frames = audio.readframes(audio.getnframes())
+        audio_bytes: bytearray = bytearray(list(audio_frames))
+        audio_bytes_length = len(audio_frames)
+        audio.close()
+        # Read stego audio data.
+        stego_audio_frames = stego_audio.readframes(stego_audio.getnframes())
+        stego_audio_bytes: bytearray = bytearray(list(stego_audio_frames))
+        stego_audio.close()
+
+        # Calculate the rms.
+        audio_bytes_2 = np.array(audio_bytes)
+        stego_audio_bytes_2 = np.array(stego_audio_bytes)
+        difference_array = np.subtract(audio_bytes_2, stego_audio_bytes_2)
+        squared_array = np.square(difference_array)
+        sum_squared_array = np.sum(squared_array)
+        rms = sum_squared_array / audio_bytes_length
+        
+        # Calculate the psnr. 
+        psnr = 20 * math.log10(255 / math.sqrt(rms))
+        return psnr
+        
+        
+        
+        
 
 
 def main():
@@ -252,6 +304,9 @@ def main():
         # Extract message.
         b:AudioStegano = AudioStegano("./testing/stego_text_in_audio.wav")
         b.extract(output_file_name="./testing/extract_message")
+
+        # PSNR
+        print("PSNR:", AudioStegano.calculatePSNR("./testing/sample_1.wav","./testing/stego_text_in_audio.wav"))
     
     # Embed audio to audio.
     elif (case == 2):
@@ -262,6 +317,9 @@ def main():
         # Extract message.
         b:AudioStegano = AudioStegano("./testing/stego_audio_in_audio.wav")
         b.extract(output_file_name="./testing/extract_message")
+
+        # PSNR
+        print("PSNR:", AudioStegano.calculatePSNR("./testing/sample_1.wav","./testing/stego_audio_in_audio.wav"))
     
     # Embed picture to audio.
     elif (case == 3):
@@ -272,6 +330,9 @@ def main():
         # Extract message.
         b:AudioStegano = AudioStegano("./testing/stego_image_in_audio.wav")
         b.extract(output_file_name="./testing/extract_message")
+
+        # PSNR
+        print("PSNR:", AudioStegano.calculatePSNR("./testing/sample_2.wav","./testing/stego_image_in_audio.wav"))
     
     # Embed video to audio.
     elif (case == 4):
@@ -283,6 +344,9 @@ def main():
         b:AudioStegano = AudioStegano("./testing/stego_video_in_audio.wav")
         b.extract(output_file_name="./testing/extract_message")
 
+        # PSNR
+        print("PSNR:", AudioStegano.calculatePSNR("./testing/sample_3.wav","./testing/stego_video_in_audio.wav"))
+
     # Embed text to audio with randomized lsb.
     elif (case == 5):
         # Embed message.
@@ -292,6 +356,9 @@ def main():
         # Extract message.
         b:AudioStegano = AudioStegano("./testing/stego_text_in_audio.wav")
         b.extract(output_file_name="./testing/extract_message", key="akuhaha")
+
+        # PSNR
+        print("PSNR:", AudioStegano.calculatePSNR("./testing/sample_1.wav","./testing/stego_text_in_audio.wav"))
     
     # Embed audio to audio with randomized lsb.
     elif (case == 6):
@@ -302,6 +369,9 @@ def main():
         # Extract message.
         b:AudioStegano = AudioStegano("./testing/stego_audio_in_audio.wav")
         b.extract(output_file_name="./testing/extract_message", key="akuma")
+
+        # PSNR
+        print("PSNR:", AudioStegano.calculatePSNR("./testing/sample_1.wav","./testing/stego_audio_in_audio.wav"))
     
     # Embed picture to audio with randomized lsb.
     elif (case == 7):
@@ -312,6 +382,9 @@ def main():
         # Extract message.
         b:AudioStegano = AudioStegano("./testing/stego_image_in_audio.wav")
         b.extract(output_file_name="./testing/extract_message", key="oni-chan")
+
+         # PSNR
+        print("PSNR:", AudioStegano.calculatePSNR("./testing/sample_2.wav","./testing/stego_image_in_audio.wav"))
     
     # Embed video to audio with randomized lsb.
     elif (case == 8):
@@ -322,6 +395,9 @@ def main():
         # Extract message.
         b:AudioStegano = AudioStegano("./testing/stego_video_in_audio.wav")
         b.extract(output_file_name="./testing/extract_message", key="oppai")
+
+         # PSNR
+        print("PSNR:", AudioStegano.calculatePSNR("./testing/sample_3.wav","./testing/stego_video_in_audio.wav"))
     
 if __name__=="__main__":
     main()
