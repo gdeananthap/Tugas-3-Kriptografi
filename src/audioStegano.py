@@ -1,12 +1,15 @@
 # Python module.
+from io import FileIO
 import os
+from typing import List
 import wave
 import ntpath
 
 from pathlib import Path
 
 # Own module.
-from helper import ArrayBynarytoString, ByteToBinary, binarytoArrayBynary, generate_random_access_table, modifyBit, stringToBinary, arrayByteToBinary
+from helper import ByteToBinary, binarytoArrayBynary, generate_random_access_table, modifyBit, \
+    stringToBinary, arrayByteToBinary
 
 class AudioStegano:
     """
@@ -14,7 +17,20 @@ class AudioStegano:
 
     Attributes.
     ----------
-
+    audio : WavAudio
+        Audio is basic wav audio readed by wave. Audio can be container object or stego object.
+    audio_path : str
+        Absolute path to audio file.
+    audio_bytes : bytesarray
+        Audio in list of byte representation.
+    payload : int
+        Number of maximum bit you can insert to audio.
+    message : bytesarray
+        Message in list of byte representation.
+    msg_extension : str
+        File extension of the message.
+    modified_message : str
+        Message in binary string representantion.
     """
 
     def __init__(self, audio_path:str, input_message_path:str=None) -> None:
@@ -41,11 +57,11 @@ class AudioStegano:
 
         # Process audio input.
         self.audio = audio
-        self.audio_path = audio_path
+        self.audio_path:str = audio_path
         # Get audio bytes representation.
         audio_frames = self.audio.readframes(self.audio.getnframes())
-        self.audio_bytes = bytearray(list(audio_frames))
-        self.payload = len(audio_frames)
+        self.audio_bytes:bytearray = bytearray(list(audio_frames))
+        self.payload:int = len(audio_frames)
 
         # Process input messages.
         if (input_message_path):
@@ -53,8 +69,8 @@ class AudioStegano:
             messages:bytes = open(input_message_path, "rb").read()
             if (not(messages)):
                 raise Exception("Input message not exist")
-            self.message = messages
-            self.msg_extension = os.path.splitext(input_message_path)[1].lower()[1:]
+            self.message:bytes = messages
+            self.msg_extension:str = os.path.splitext(input_message_path)[1].lower()[1:]
             # Check if current audio file is big enough to hide text.
             # For each bytes(8 bit) you can only hide one bit from message. You also need to keep space 
             # for input file extension and randomized, encrypt, start and endfile flag. 
@@ -90,13 +106,15 @@ class AudioStegano:
         flag_file_extension:str = stringToBinary(self.msg_extension)
 
         # Save modified message and return it.
-        modified_message = arrayByteToBinary(self.message)
-        modified_message = flag_random + flag_encrypt + flag_file_extension + flag_start_message + modified_message + flag_end_message
-        self.modified_message = modified_message
+        modified_message:str = arrayByteToBinary(self.message)
+        modified_message = flag_random + flag_encrypt + flag_file_extension + flag_start_message \
+            + modified_message + flag_end_message
+        self.modified_message:str = modified_message
         return modified_message
 
 
-    def embed(self,enc_key:str=None, key:str=None, is_random:bool=False, is_encrypt:bool=False, output_file_name:str="") -> str:
+    def embed(self,enc_key:str=None, key:str=None, is_random:bool=False, is_encrypt:bool=False, 
+        output_file_name:str="") -> str:
         """
         Function to hide user message on audio. 
         Return output file path.
@@ -121,7 +139,7 @@ class AudioStegano:
         self.normalizeMessage(key, is_random, is_encrypt)
 
         # Generate access table.
-        access_table = list(range(1, self.payload)) 
+        access_table:List[int] = list(range(1, self.payload)) 
         if is_random and key:
             access_table = generate_random_access_table(key,self.payload)
 
@@ -132,13 +150,15 @@ class AudioStegano:
         for messageIndex, audioIndex in enumerate(access_table, 1):
             if (messageIndex >= len(self.modified_message)):
                 break
-            self.audio_bytes[audioIndex] = modifyBit(self.audio_bytes[audioIndex],0,int(self.modified_message[messageIndex]))
+            self.audio_bytes[audioIndex] = modifyBit(self.audio_bytes[audioIndex], 0,
+                int(self.modified_message[messageIndex]))
         
         # Write file output.
-        output_file_path = output_file_name
+        output_file_path:str = output_file_name
         if output_file_path == "":
-            old_filename = ntpath.basename(self.audio_path).split('.')
-            output_file_path = str(Path(self.audio_path).parent) + '/' + old_filename[0] + '_embedded.' + old_filename[1]
+            old_filename:str = ntpath.basename(self.audio_path).split('.')
+            output_file_path = str(Path(self.audio_path).parent) + '/' + old_filename[0] + \
+                '_embedded.' + old_filename[1]
         else:
             output_file_path = output_file_path + '.wav'
         with wave.open(output_file_path, 'wb') as wav_file:
@@ -163,71 +183,145 @@ class AudioStegano:
             File name for output message.
         """
         # Check if stego audio lsb is randomized.
-        print(ByteToBinary(self.audio_bytes[0])[-1], ByteToBinary(self.audio_bytes[1])[-1])
-        is_random = False
+        is_random:bool = False
         if (ByteToBinary(self.audio_bytes[0])[-1]=="1"):
             is_random = True
         if ((is_random and not(key)) or (not(is_random) and key)):
             raise Exception("You must provide key for this stego-audio file")
         
         # Generate access table based on randomized or not.
-        access_table = list(range(1, self.payload)) 
+        access_table:List[int] = list(range(1, self.payload)) 
         if is_random:
             access_table = generate_random_access_table(key,self.payload)
 
         # Get all LSB from audio_bytes.
-        bit_message = ""
-        for messageIndex, audioIndex in enumerate(access_table, 1):
-            bit_message += str(ByteToBinary(self.audio_bytes[audioIndex])[-1])
+        bit_message:str = ""
+        for audioIndex in access_table :
+            bit_message += (str(ByteToBinary(self.audio_bytes[audioIndex]))[-1])
         # Check flag encrypted.
-        is_encrypted = False
+        is_encrypted:bool = False
         if (bit_message[0]=="1"):
             is_encrypted = True
-        bit_message = bit_message[0:]
+        bit_message = bit_message[1:]
 
         # Transform binary string to bytearray like list.
-        bytes_message = binarytoArrayBynary(bit_message)
+        bytes_message:List[int] = binarytoArrayBynary(bit_message)
 
         # Search for file extension.
-        file_extension = ""
+        file_extension:str = ""
         for index, object in enumerate (bytes_message):
             file_extension += chr(int(object,2))
-            if (chr(int(bytes_message[index+1],2)) == "<" and chr(int(bytes_message[index+2],2)) == "?"):
+            if (chr(int(bytes_message[index+1],2)) == "<" and chr(int(bytes_message[index+2],2)) \
+                == "?"):
                 break
         
         # Search for real message content.
         start_message_index = index + 3
-        message = ""
+        message = []
 
-        for index, object in enumerate (bytes_message, start_message_index):
-            message += chr(int(object,2))
-            if (chr(int(bytes_message[index+1],2)) == "?" and chr(int(bytes_message[index+2],2)) == ">"):
+        for i in range(start_message_index, self.payload):
+            message.append(int(bytes_message[i],2))
+            if (chr(int(bytes_message[i+1],2)) == "?" and chr(int(bytes_message[i+2],2)) == ">"):
                 break
-
-        message = bytes(message)
+        message:bytes = bytes(message)
 
         # Check if ecnrypted but user doesn't provide key.
         if (is_encrypted and not(enc_key)):
             raise Exception("You must provide decription key for extractting this message. ")
         # TODO : Decrypt the text.
         # if (is_encrypted):
-        #     message = decrypt(key, decoded_msg)
+        #     message = decrypt(key, message)
 
         # Write file output.
-        output_file_path = output_file_name + '.' + file_extension    
-        new_file = open(output_file_path, "wb")
+        output_file_path:str = output_file_name + '.' + file_extension    
+        new_file:FileIO = open(output_file_path, "wb")
         new_file.write(message)
         new_file.close()
 
         return output_file_path
 
 
-if __name__=="__main__":
-    
-    # Embed message.
-    a:AudioStegano = AudioStegano("./testing/file_example_WAV_1MG.wav","./testing/aku.txt")
-    a.embed(output_file_name="./testing/Wakaranai")
+def main():
+    case = int(input("Masukkan pilihan: "))
+    # Embed text to audio.
+    if (case == 1):
+        # Embed message.
+        a:AudioStegano = AudioStegano("./testing/sample_1.wav","./testing/message.txt")
+        a.embed(output_file_name="./testing/stego_text_in_audio")
 
-    # Extract message.
-    b:AudioStegano = AudioStegano("./testing/Wakaranai.wav")
-    b.extract("./testing/aku2.txt")
+        # Extract message.
+        b:AudioStegano = AudioStegano("./testing/stego_text_in_audio.wav")
+        b.extract(output_file_name="./testing/extract_message")
+    
+    # Embed audio to audio.
+    elif (case == 2):
+        # Embed message.
+        a:AudioStegano = AudioStegano("./testing/sample_1.wav","./testing/message.wav")
+        a.embed(output_file_name="./testing/stego_audio_in_audio")
+
+        # Extract message.
+        b:AudioStegano = AudioStegano("./testing/stego_audio_in_audio.wav")
+        b.extract(output_file_name="./testing/extract_message")
+    
+    # Embed picture to audio.
+    elif (case == 3):
+        # Embed message.
+        a:AudioStegano = AudioStegano("./testing/sample_2.wav","./testing/message.png")
+        a.embed(output_file_name="./testing/stego_image_in_audio")
+
+        # Extract message.
+        b:AudioStegano = AudioStegano("./testing/stego_image_in_audio.wav")
+        b.extract(output_file_name="./testing/extract_message")
+    
+    # Embed video to audio.
+    elif (case == 4):
+        # Embed message.
+        a:AudioStegano = AudioStegano("./testing/sample_3.wav","./testing/message.avi")
+        a.embed(output_file_name="./testing/stego_video_in_audio")
+
+        # Extract message.
+        b:AudioStegano = AudioStegano("./testing/stego_video_in_audio.wav")
+        b.extract(output_file_name="./testing/extract_message")
+
+    # Embed text to audio with randomized lsb.
+    elif (case == 5):
+        # Embed message.
+        a:AudioStegano = AudioStegano("./testing/sample_1.wav","./testing/message.txt")
+        a.embed(output_file_name="./testing/stego_text_in_audio", is_random=True, key="akuhaha")
+
+        # Extract message.
+        b:AudioStegano = AudioStegano("./testing/stego_text_in_audio.wav")
+        b.extract(output_file_name="./testing/extract_message", key="akuhaha")
+    
+    # Embed audio to audio with randomized lsb.
+    elif (case == 6):
+        # Embed message.
+        a:AudioStegano = AudioStegano("./testing/sample_1.wav","./testing/message.wav")
+        a.embed(output_file_name="./testing/stego_audio_in_audio", is_random=True, key="akuma")
+
+        # Extract message.
+        b:AudioStegano = AudioStegano("./testing/stego_audio_in_audio.wav")
+        b.extract(output_file_name="./testing/extract_message", key="akuma")
+    
+    # Embed picture to audio with randomized lsb.
+    elif (case == 7):
+        # Embed message.
+        a:AudioStegano = AudioStegano("./testing/sample_2.wav","./testing/message.png")
+        a.embed(output_file_name="./testing/stego_image_in_audio", is_random=True, key="oni-chan")
+
+        # Extract message.
+        b:AudioStegano = AudioStegano("./testing/stego_image_in_audio.wav")
+        b.extract(output_file_name="./testing/extract_message", key="oni-chan")
+    
+    # Embed video to audio with randomized lsb.
+    elif (case == 8):
+        # Embed message.
+        a:AudioStegano = AudioStegano("./testing/sample_3.wav","./testing/message.avi")
+        a.embed(output_file_name="./testing/stego_video_in_audio", is_random=True, key="oppai")
+
+        # Extract message.
+        b:AudioStegano = AudioStegano("./testing/stego_video_in_audio.wav")
+        b.extract(output_file_name="./testing/extract_message", key="oppai")
+    
+if __name__=="__main__":
+    main()

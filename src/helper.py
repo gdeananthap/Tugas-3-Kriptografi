@@ -43,7 +43,7 @@ def ArrayBynarytoString(binary:List[int])->str:
 
 def ByteToBinary(byte:bytes)->str:
     """
-    Converting arraybite to binary.
+    Converting byte to binary.
 
     Parameter.
     ----------
