@@ -1,14 +1,14 @@
 {% extends 'layouts/base.html' %} 
-{% set active_page = 'audio_steganography' %}
+{% set active_page = 'image_steganography' %}
 
 {% block title %} 
-	Audio Steganography
+	Image Steganography
 {% endblock %}
 
 {% block heading %} 
-		<h2 class="crypto-title">Audio Steganography</h2>
+		<h2 class="crypto-title">Image Steganography</h2>
 		<p class="crypto-subtitle"> 
-			A technique used to transmit hidden information by modifying an audio signal in an imperceptible manner. It is the science of hiding some secret text or audio information in a host message.
+			A technique used to transmit hidden information by modifying an image bytes in an imperceptible manner. It is the science of hiding some secret information in an image.
 		</p>
 {% endblock %}
 
@@ -27,7 +27,7 @@
 		<div class="tab-pane fade show {{ 'active' if embed }}" id="embed" role="tabpanel" aria-labelledby="embed-tab">
 			<div class="row mt-3">
 				<div class="col-12 mt-2">
-					<form action="{{ url_for('audioSteganoEmbed') }}" enctype="multipart/form-data" method="POST">
+					<form action="{{ url_for('imageSteganoEmbed') }}" enctype="multipart/form-data" method="POST">
 						<div class="card">
 							<div class="card-body">
 								<div class="row">
@@ -72,9 +72,9 @@
 									</div>
 									<div class="col-md-12">
 										<div class="form-group">
-											<label for="file-audio">File Audio</label>
-											<input type="file" accept=".wav" class="form-control pt-1" id="file-audio"
-												aria-describedby="file-audio" name="file-audio" placeholder="basic audio" />
+											<label for="file-image">File Image</label>
+											<input type="file" accept=".png, .bmp" class="form-control pt-1" id="file-image"
+												aria-describedby="file-image" name="file-image" placeholder="basic image" />
 										</div>
 									</div>
 									<div class="col-md-12">
@@ -123,13 +123,13 @@
 									<div class="col-md-12">
 										<div class="form-group">
 											<label for="psnr">PSNR</label>
-											<input type="text" readonly value="The psnr of the audio is {{ psnr }}" class="form-control" id="psnr" aria-describedby="psnr" name="psnr">
+											<input type="text" readonly value="The psnr of the image is {{ psnr }}" class="form-control" id="psnr" aria-describedby="psnr" name="psnr">
 										</div>
 									</div>
 									<div class="col-md-12">
 										<div class="form-group">
 											<div class="form-control">
-												<i class="far fa-file-video fa-lg"> <a href="/download/{{ output_filename }}">{{output_filename}}</i> </a>
+												<i class="far fa-file-image fa-lg"> <a href="/download/{{ output_filename }}">{{output_filename}}</i> </a>
 											</div>
 										</div>
 									</div>
@@ -143,7 +143,7 @@
 		<div class="tab-pane fade show {{ 'active' if not embed }}" id="extract" role="tabpanel" aria-labelledby="extract-tab">
 			<div class="row mt-3">
 				<div class="col-12 mt-2">
-					<form action="{{ url_for('audioSteganoExtract') }}" enctype="multipart/form-data" method="POST">
+					<form action="{{ url_for('imageSteganoExtract') }}" enctype="multipart/form-data" method="POST">
 						<div class="card">
 							<div class="card-body">
 								<div class="row">
@@ -159,16 +159,16 @@
 									{% endif %}
 									<div class="col-md-12">
 										<div class="form-group">
-											<label for="file-stego-audio">File Stego-Audio</label>
-											<input type="file" accept=".wav" class="form-control pt-1" id="file-stego-audio"
-												aria-describedby="file-stego-audio" name="file-stego-audio" />
+											<label for="file-stego-image">File Stego-Image</label>
+											<input type="file" accept=".bmp, .png" class="form-control pt-1" id="file-stego-image"
+												aria-describedby="file-stego-image" name="file-stego-image" />
 										</div>
 									</div>
 									<div class="col-md-12">
 										<div class="form-group">
 											<label for="output-name">Name for output file [without extension]</label>
 											<input type="text" class="form-control" id="output-name" aria-describedby="output-name"
-												name="output-name" value="{{ form['output-name'] if form }}" />
+												name="output-name" value="{{ form['output-name'] if form }}" required/>
 										</div>
 									</div>
 									<div class="col-md-12">

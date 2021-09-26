@@ -82,7 +82,7 @@ class ImageStegano:
             # For each bytes(8 bit) you can only hide one bit from message. You also need to keep space 
             # for input file extension and randomized, encrypt, start and endfile flag. 
             if len(self.message) > self.max_payload_size//8 - len(self.msg_extension) - 5:
-                raise Exception("Input message is to big")
+                raise Exception("Input message is too big")
         
         image.close()
 
@@ -143,6 +143,10 @@ class ImageStegano:
         # Input validation.
         if (key and not(is_random)):
             raise Exception("Key inserted but message embedding not randomized")
+        elif (is_random and not key):
+            raise Exception("You must provide a key for randomized method")
+        elif (is_encrypt and not enc_key):
+            raise Exception("You must provide a key for encryption")
         
         # Normalize message first.
         self.normalizeMessage(key, is_random, is_encrypt)
@@ -164,7 +168,7 @@ class ImageStegano:
         
         # Write file output.
         output_file_path:str = output_file_name
-        if output_file_path == "":
+        if ntpath.basename(output_file_path).split('.')[0] == "":
             old_filename:str = ntpath.basename(self.image_path).split('.')
             output_file_path = str(Path(self.image_path).parent) + '/' + old_filename[0] + \
                 '_embedded.' + old_filename[1]
@@ -172,7 +176,7 @@ class ImageStegano:
             output_file_path = output_file_path + self.image_extension
 
         with Image.frombytes(self.image.mode, self.image.size, bytes(self.image_bytes)) as new_image:
-            new_image.save(output_file_path)
+            new_image.save(output_file_path, self.image.format)
             new_image.close()
 
         return output_file_path
