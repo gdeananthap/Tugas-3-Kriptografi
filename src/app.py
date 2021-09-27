@@ -46,7 +46,7 @@ def rc4():
 @app.route('/rc4-cipher/encrypt',  methods=['POST', 'GET'])
 def rc4Encrypt():
 	if request.method == 'POST':
-		if(request.form["encrypt"]=="encrypt-file"):
+		if(request.form["encrypt"]=="file"):
 			plaintext = request.form['plaintext']
 			key = request.form['key']
 			ciphertext = encrypt(plaintext, key)
@@ -65,7 +65,7 @@ def rc4Encrypt():
 @app.route('/rc4-cipher/decrypt',  methods=['POST', 'GET'])
 def rc4Decrypt():
 	if request.method == 'POST':
-		if(request.form["decrypt"]=="encrypt-file"):
+		if(request.form["decrypt"]=="file"):
 			ciphertext = request.form['ciphertext']
 			key = request.form['key']
 			plaintext = decrypt(ciphertext, key)
