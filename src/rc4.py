@@ -33,8 +33,6 @@ def prga(text, s, mode="encrypt"):
         c = bytearray()
         for idx in range(len(text)):
             i = (i+1) % 256
-            print(type(j))
-            print(type(s[i]))
             j = (j+s[i]) % 256
             s = swap(s, i, j)
             t = (s[i]+s[j]) % 256
