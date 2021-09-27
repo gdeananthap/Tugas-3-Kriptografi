@@ -5,12 +5,9 @@ from werkzeug.datastructures import FileStorage
 import traceback
 
 from audioStegano import AudioStegano
-<<<<<<< HEAD
 from rc4 import encrypt, encryptByte, decrypt, decryptByte
-=======
 from imageStegano import ImageStegano
 
->>>>>>> 140bebb81f602e7f9cdb7c857a9ea20442a7f19e
 # Flask Configuration.
 app = Flask(__name__)
 UPLOAD_FOLDER = './static/uploads'
