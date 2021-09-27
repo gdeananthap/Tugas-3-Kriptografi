@@ -2,9 +2,15 @@ import os
 from flask import Flask, render_template, request, redirect, url_for, send_from_directory, current_app
 from flask.helpers import send_file
 from werkzeug.datastructures import FileStorage
+import traceback
 
 from audioStegano import AudioStegano
+<<<<<<< HEAD
 from rc4 import encrypt, encryptByte, decrypt, decryptByte
+=======
+from imageStegano import ImageStegano
+
+>>>>>>> 140bebb81f602e7f9cdb7c857a9ea20442a7f19e
 # Flask Configuration.
 app = Flask(__name__)
 UPLOAD_FOLDER = './static/uploads'
@@ -91,12 +97,79 @@ def imageStegano():
 # Embed route.
 @app.route('/image-steganography/embed', methods=['POST', 'GET'])
 def imageSteganoEmbed():
-	return redirect(url_for('imageStegano'))
+	if request.method == 'POST':
+		# Get request payload.
+		is_random = request.form['embed-method'] == "random" or False
+		is_encrypt = request.form['message-rc4'] == "encrypt" or False 
+		key_random = request.form['key-random']  or None
+		key_encrypt = request.form['key-encrypt'] or None
+		print(key_random, key_encrypt, is_random, is_encrypt)
+		output_filename = request.form['output-name']
+		output_filename = os.path.join(current_app.root_path, app.config['UPLOAD_FOLDER'], output_filename)
+		
+		# Catch exception when embedding message.
+		try:
+			# Save the uploaded file to local.
+			# Save image file.
+			file_image = request.files['file-image']
+			file_image.stream.seek(0)
+			file_image_path = os.path.join(current_app.root_path, app.config['UPLOAD_FOLDER'], file_image.filename)
+			file_image.save(file_image_path)
+			# Save message file.
+			file_message = request.files['file-message']
+			file_message.stream.seek(0)
+			file_message_path = os.path.join(current_app.root_path, app.config['UPLOAD_FOLDER'], file_message.filename)
+			file_message.save(file_message_path)
+	
+			# Embed the message.
+			image_stegano:ImageStegano = ImageStegano(file_image_path, file_message_path)
+			output_filepath = image_stegano.embed(enc_key=key_encrypt, key=key_random, is_random=is_random, 
+				is_encrypt=is_encrypt, output_file_name=output_filename)
+			# Calculate psnr 
+			PSNR = ImageStegano.calculatePSNR(file_image_path,output_filepath)
+			return render_template('pages/image-steganography.html', embed=True, psnr=PSNR, output_filename = os.path.basename(output_filepath))
+		
+		except (Exception) as e:
+			# Render error webpage.
+			return render_template('pages/image-steganography.html', embed=True, error = e, form = request.form)
+	else:
+		if request.method == 'POST':
+			pass
+		else:
+			return redirect(url_for('imageStegano'))
 
 # Extract route.
 @app.route('/image-steganography/extract', methods=['POST', 'GET'])
 def imageSteganoExtract():
-	return redirect(url_for('imageStegano'))
+	if request.method == 'POST':
+		# Get request payload.
+		key_random = request.form['key-random']  or None
+		key_encrypt = request.form['key-encrypt'] or None
+		output_filename = request.form['output-name']
+		output_filename = os.path.join(current_app.root_path, app.config['UPLOAD_FOLDER'], output_filename)
+		
+		# Catch exception when embedding message.
+		try:
+			# Save the uploaded file to local.
+			# Save image file.
+			file_stego_image = request.files['file-stego-image']
+			file_stego_image.stream.seek(0)
+			file_stego_image_path = os.path.join(current_app.root_path, app.config['UPLOAD_FOLDER'], file_stego_image.filename)
+			file_stego_image.save(file_stego_image_path)
+		
+			# Extract the message.
+			image_stegano:ImageStegano = ImageStegano(file_stego_image_path)
+			output_filepath = image_stegano.extract(output_filename, enc_key=key_encrypt, key=key_random)
+			extension = os.path.splitext(output_filepath)[1].lower()
+
+			return send_from_directory(os.path.join(current_app.root_path, app.config['UPLOAD_FOLDER']), request.form['output-name'] + extension, as_attachment=True)
+		except (Exception) as e:
+			# Render error webpage.
+			return render_template('pages/image-steganography.html', embed=False,
+			error = e, form = request.form)
+	else:
+		# Render default webpage. 
+		return redirect(url_for('imageStegano'))
 
 
 """
@@ -145,7 +218,7 @@ def audioSteganoEmbed():
 		
 		except (Exception) as e:
 			# Render error webpage.
-			return render_template('pages/audio-steganography.html', encrypt=True,
+			return render_template('pages/audio-steganography.html', embed=True,
 			error = e, form = request.form)
 	else:
 		# Render default webpage. 
