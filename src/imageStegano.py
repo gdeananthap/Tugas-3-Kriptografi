@@ -8,6 +8,7 @@ import numpy as np
 from PIL import Image
 from io import FileIO
 from pathlib import Path
+from rc4 import encryptByte2, decryptByte2
 
 # Own module.
 from helper import ByteToBinary, binarytoArrayBynary, generate_random_access_table, modifyBit, \
@@ -86,7 +87,7 @@ class ImageStegano:
         
         image.close()
 
-    def normalizeMessage(self, key:str, is_random:bool, is_encrypt:bool) -> str:
+    def normalizeMessage(self, enc_key:str, is_random:bool, is_encrypt:bool) -> str:
         """
         Function to normalize message you want to encrypt by inserting specific flag and turn the 
         string to binary. 
@@ -106,7 +107,8 @@ class ImageStegano:
         flag_encrypt:str ="0"
         if (is_encrypt):
             flag_encrypt = "1"
-            # TODO: Encrypt the message with RC4.
+            self.message = encryptByte2(self.message, enc_key)
+
         # Start and End messages flag. 
         flag_start_message:str = stringToBinary("<?")
         flag_end_message:str = stringToBinary("?>")
@@ -149,7 +151,7 @@ class ImageStegano:
             raise Exception("You must provide a key for encryption")
         
         # Normalize message first.
-        self.normalizeMessage(key, is_random, is_encrypt)
+        self.normalizeMessage(enc_key, is_random, is_encrypt)
 
         # Generate access table.
         access_table:List[int] = list(range(1, self.max_payload_size)) 
@@ -241,9 +243,9 @@ class ImageStegano:
         # Check if ecnrypted but user doesn't provide key.
         if (is_encrypted and not(enc_key)):
             raise Exception("You must provide decription key for extractting this message. ")
-        # TODO : Decrypt the text.
-        # if (is_encrypted):
-        #     message = decrypt(key, message)
+
+        if (is_encrypted):
+            message = decryptByte2(message, enc_key)
 
         # Write file output.
         output_file_path:str = output_file_name + '.' + file_extension    
