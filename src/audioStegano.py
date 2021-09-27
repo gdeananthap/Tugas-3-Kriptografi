@@ -8,6 +8,7 @@ import numpy as np
 
 from io import FileIO
 from pathlib import Path
+from rc4 import encryptByte2, decryptByte2
 
 # Own module.
 from helper import ByteToBinary, binarytoArrayBynary, generate_random_access_table, modifyBit, \
@@ -86,7 +87,7 @@ class AudioStegano:
 		except Exception as e:
 			raise Exception("Cannot process input file!")
 
-	def normalizeMessage(self, key:str, is_random:bool, is_encrypt:bool) -> str:
+	def normalizeMessage(self, enc_key:str, is_random:bool, is_encrypt:bool) -> str:
 		"""
 		Function to normalize message you want to encrypt by inserting specific flag and turn the 
 		string to binary. 
@@ -94,6 +95,8 @@ class AudioStegano:
 
 		Parameter.
 		----------
+		enc_key : str
+			key for encrypting message
 		is_random : bool, default false
 			Boolean indicating lsb randomized or not.
 		is_encrypt : bool, default false
@@ -106,7 +109,8 @@ class AudioStegano:
 		flag_encrypt:str ="0"
 		if (is_encrypt):
 			flag_encrypt = "1"
-			# TODO: Encrypt the message with RC4.
+			self.message = encryptByte2(self.message, enc_key)
+
 		# Start and End messages flag. 
 		flag_start_message:str = stringToBinary("<?")
 		flag_end_message:str = stringToBinary("?>")
@@ -115,7 +119,9 @@ class AudioStegano:
 		flag_file_extension:str = stringToBinary(self.msg_extension)
 
 		# Save modified message and return it.
+		print("kontolodon1")
 		modified_message:str = arrayByteToBinary(self.message)
+		print("kontolodon2")
 		modified_message = flag_random + flag_encrypt + flag_file_extension + flag_start_message \
 			+ modified_message + flag_end_message
 		self.modified_message:str = modified_message
@@ -145,7 +151,7 @@ class AudioStegano:
 			raise Exception("Key inserted but message embedding not randomized")
 		
 		# Normalize message first.
-		self.normalizeMessage(key, is_random, is_encrypt)
+		self.normalizeMessage(enc_key, is_random, is_encrypt)
 
 		# Generate access table.
 		access_table:List[int] = list(range(1, self.payload)) 
@@ -237,9 +243,8 @@ class AudioStegano:
 		# Check if ecnrypted but user doesn't provide key.
 		if (is_encrypted and not(enc_key)):
 			raise Exception("You must provide decription key for extractting this message. ")
-		# TODO : Decrypt the text.
-		# if (is_encrypted):
-		#     message = decrypt(key, message)
+		if (is_encrypted):
+			message = decryptByte2(message, enc_key)
 
 		# Write file output.
 		output_file_path:str = output_file_name + '.' + file_extension    
@@ -292,10 +297,6 @@ class AudioStegano:
 		psnr = 20 * math.log10(255 / math.sqrt(rms))
 		return psnr
 		
-		
-		
-		
-
 
 def main():
 	case = int(input("Masukkan pilihan: "))

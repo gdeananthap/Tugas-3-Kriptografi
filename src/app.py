@@ -2,7 +2,6 @@ import os
 from flask import Flask, render_template, request, redirect, url_for, send_from_directory, current_app
 from flask.helpers import send_file
 from werkzeug.datastructures import FileStorage
-import traceback
 
 from audioStegano import AudioStegano
 from rc4 import encrypt, encryptByte, decrypt, decryptByte

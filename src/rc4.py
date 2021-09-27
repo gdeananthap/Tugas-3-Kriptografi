@@ -74,6 +74,11 @@ def encryptByte(text, key):
     c = prga(text, s, "encrypt-byte")
     return io.BytesIO(c)
 
+def encryptByte2(text, key):
+    s = ksa(key)
+    c = prga(text, s, "encrypt-byte")
+    return c
+
 def decrypt(text, key):
     s = ksa(key)
     p = prga(text, s, "decrypt")
@@ -83,6 +88,11 @@ def decryptByte(text, key):
     s = ksa(key)
     p = prga(text, s, "encrypt-byte")
     return io.BytesIO(p)
+
+def decryptByte2(text, key):
+    s = ksa(key)
+    p = prga(text, s, "encrypt-byte")
+    return p
 
 # Main Program
 def main():
