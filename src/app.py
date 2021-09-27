@@ -4,7 +4,7 @@ from flask.helpers import send_file
 from werkzeug.datastructures import FileStorage
 
 from audioStegano import AudioStegano
-
+from rc4 import encrypt, encryptByte, decrypt, decryptByte
 # Flask Configuration.
 app = Flask(__name__)
 UPLOAD_FOLDER = './static/uploads'
@@ -43,12 +43,40 @@ def rc4():
 # Encrypt route.
 @app.route('/rc4-cipher/encrypt',  methods=['POST', 'GET'])
 def rc4Encrypt():
-  return render_template('pages/rc4-cipher.html', encrypt=True)
+	if request.method == 'POST':
+		if(request.form["encrypt"]=="encrypt-file"):
+			plaintext = request.form['plaintext']
+			key = request.form['key']
+			ciphertext = encrypt(plaintext, key)
+			return render_template('pages/rc4-cipher.html', encrypt=True, plaintext=plaintext, key=key, result_ciphertext=ciphertext)
+		else:
+			key = request.form['key']
+			file = request.files['file-plaintext']
+			file_contents = file.read()
+			filename = file.filename
+			cipher_file = encryptByte(file_contents, key)
+			return send_file(cipher_file, as_attachment=True, attachment_filename="encrypted-"+filename)
+	else:
+		return redirect(url_for('rc4'))
 
 # Decrypt route.
 @app.route('/rc4-cipher/decrypt',  methods=['POST', 'GET'])
 def rc4Decrypt():
-  return render_template('pages/rc4-cipher.html', encrypt=False)
+	if request.method == 'POST':
+		if(request.form["decrypt"]=="encrypt-file"):
+			ciphertext = request.form['ciphertext']
+			key = request.form['key']
+			plaintext = decrypt(ciphertext, key)
+			return render_template('pages/rc4-cipher.html', encrypt=False, result_plaintext=plaintext, key=key, ciphertext=ciphertext)
+		else:
+			key = request.form['key']
+			file = request.files['file-ciphertext']
+			file_contents = file.read()
+			filename = file.filename
+			decipher_file = decryptByte(file_contents, key)
+			return send_file(decipher_file, as_attachment=True, attachment_filename="decrypted-"+filename)
+	else:
+		return redirect(url_for('rc4'))
 
 """
 --------------------------------------------------------------

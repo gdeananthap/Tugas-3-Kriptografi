@@ -68,8 +68,8 @@
 									<div class="col-md-12">
 										<div class="form-group">
 											<label for="key-encrypt">Key</label>
-											{% if result_ciphertext %}
-												<textarea name="key" id="key-encrypt" cols="30" rows="4"class="form-control">{{ result_ciphertext.key }}</textarea>
+											{% if key %}
+												<textarea name="key" id="key-encrypt" cols="30" rows="4"class="form-control">{{ key }}</textarea>
 											{% elif form %}
 												<textarea name="key" id="key-encrypt" cols="30" rows="4"class="form-control">{{ form.key }}</textarea>
 											{% else %}
@@ -98,7 +98,7 @@
 									<div class="form-group">
 										<label for="result-ciphertext">Ciphertext</label>
 										<textarea name="result-ciphertext" readonly id="result-ciphertext" cols="30"
-											rows="4" class="form-control">{{ result_ciphertext.ciphertext.upper() }}</textarea>
+											rows="4" class="form-control">{{ result_ciphertext }}</textarea>
 									</div>
 								</div>
 							</div>
@@ -106,7 +106,7 @@
 					</div>
 					<div class="row mt-2">
 						<div class="col">
-							<button id="download-ciphertext" onclick="downloadFile(resultCipher.value)"
+							<button id="download-ciphertext" onclick="downloadFile(result_ciphertext)"
 								class="btn btn-secondary btn-block"> Download Ciphertext</button>
 						</div>
 					</div>
@@ -160,8 +160,8 @@
 									<div class="col-md-12">
 										<div class="form-group">
 											<label for="key-decrypt">Key</label>
-											{% if result_plaintext %}
-												<textarea name="key" id="key-decrypt" cols="30" rows="4"class="form-control">{{ result_plaintext.key }}</textarea>
+											{% if key %}
+												<textarea name="key" id="key-decrypt" cols="30" rows="4"class="form-control">{{ key }}</textarea>
 											{% elif form %}
 												<textarea name="key" id="key-decrypt" cols="30" rows="4"class="form-control">{{ form.key }}</textarea>
 											{% else %}
@@ -189,7 +189,7 @@
 								<div class="col-md-12">
 									<div class="form-group">
 										<label for="result-plaintext">Plaintext</label>
-										<textarea name="result-plaintext" readonly id="result-plaintext" cols="30" rows="4" class="form-control">{{ result_plaintext.plaintext}} </textarea>
+										<textarea name="result-plaintext" readonly id="result-plaintext" cols="30" rows="4" class="form-control">{{ result_plaintext}} </textarea>
 									</div>
 								</div>
 							</div>
@@ -198,7 +198,7 @@
 					<div class="row mt-2">
 						<div class="col">
 							<button id="download-plaintext" class="btn btn-secondary btn-block"
-								onclick="downloadFile(resultPlain.value)"> Download Plaintext</button>
+								onclick="downloadFile(result_plaintext)"> Download Plaintext</button>
 						</div>
 					</div>
 				</div>
