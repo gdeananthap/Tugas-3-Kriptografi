@@ -119,9 +119,7 @@ class AudioStegano:
 		flag_file_extension:str = stringToBinary(self.msg_extension)
 
 		# Save modified message and return it.
-		print("kontolodon1")
 		modified_message:str = arrayByteToBinary(self.message)
-		print("kontolodon2")
 		modified_message = flag_random + flag_encrypt + flag_file_extension + flag_start_message \
 			+ modified_message + flag_end_message
 		self.modified_message:str = modified_message
