@@ -27,6 +27,7 @@ def prga(text, s, mode="encrypt"):
             s = swap(s, i, j)
             t = (s[i]+s[j]) % 256
             u = s[t]
+            # Modified
             c += hex(u^ord(text[idx])^j)[2:].zfill(2).upper()
         return c
     elif(mode=="encrypt-byte"):
@@ -39,6 +40,7 @@ def prga(text, s, mode="encrypt"):
             s = swap(s, i, j)
             t = (s[i]+s[j]) % 256
             u = s[t]
+            # Modified
             c.append(u^text[idx]^j)
         return c
     elif(mode=="decrypt"):
@@ -50,10 +52,11 @@ def prga(text, s, mode="encrypt"):
             s = swap(s, i, j)
             t = (s[i]+s[j]) % 256
             u = s[t]
+            # Modified
             p += hex(u^int(text[idx], 16)^j)[2:].zfill(2).upper()
         p = ''.join(chr(int(p[l:l+2], 16)) for l in range(0, len(p), 2))
         return p
-    else: #(mode=="encrypt-byte")
+    else: #(mode=="decrypt-byte")
         p = bytearray()
         for idx in range(len(text)):
             i = (i+1) % 256
@@ -61,6 +64,7 @@ def prga(text, s, mode="encrypt"):
             s = swap(s, i, j)
             t = (s[i]+s[j]) % 256
             u = s[t]
+            # Modified
             p.append(u^text[idx]^j)
         return p
 
