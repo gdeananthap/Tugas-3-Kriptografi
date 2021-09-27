@@ -71,39 +71,45 @@ function downloadFile(data) {
 
 // Add event listener for loading plaintext file, so it will automaticaly change 
 // plaintext textarea value.
-filePlaintext.addEventListener('change', (event) => {
-    const fileList = event.target.files;
-    if (fileList[0].type != "text/plain") {
-        return;
-    }
-    const fr = new FileReader();
-    fr.onload = function () {
-        plainText.value = fr.result;
-        if (!plaintextInput) {
-            plainText.value = fr.result.replace(/[\W_0-9]/g, '');
+if (filePlaintext){
+    filePlaintext.addEventListener('change', (event) => {
+        const fileList = event.target.files;
+        if (fileList[0].type != "text/plain") {
+            return;
         }
-    }
-    fr.readAsText(fileList[0]);
-});
+        const fr = new FileReader();
+        fr.onload = function () {
+            plainText.value = fr.result;
+            if (!plaintextInput) {
+                plainText.value = fr.result.replace(/[\W_0-9]/g, '');
+            }
+        }
+        fr.readAsText(fileList[0]);
+    });
+}
+
 
 // Add event listener for loading ciphertext file, so it will automaticaly change 
 // ciphertext textarea value.
-fileCiphertext.addEventListener('change', (event) => {
-    const fileList = event.target.files;
-    if (fileList[0].type != "text/plain") {
-        return;
-    }
-    const fr = new FileReader();
-    fr.onload = function () {
-        cipherText.value = fr.result;
-        if (!ciphertextInput) {
-            const cipher = fr.result.replace(/[\W_0-9]/g, '');
-            cipherText.value = cipher.toUpperCase();
+if (fileCiphertext){
+    fileCiphertext.addEventListener('change', (event) => {
+        const fileList = event.target.files;
+        if (fileList[0].type != "text/plain") {
+            return;
         }
+        const fr = new FileReader();
+        fr.onload = function () {
+            cipherText.value = fr.result;
+            if (!ciphertextInput) {
+                const cipher = fr.result.replace(/[\W_0-9]/g, '');
+                cipherText.value = cipher.toUpperCase();
+            }
 
-    }
-    fr.readAsText(fileList[0]);
-});
+        }
+        fr.readAsText(fileList[0]);
+    });
+}
+
 // Add event listener for cr4 cipher page.
 if (radioEncFile) {
     radioEncFile.addEventListener("click", () => {
