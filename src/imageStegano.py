@@ -82,7 +82,7 @@ class ImageStegano:
             # Check if current image file is big enough to hide message.
             # For each bytes(8 bit) you can only hide one bit from message. You also need to keep space 
             # for input file extension and randomized, encrypt, start and endfile flag. 
-            if len(self.message) > self.max_payload_size//8 - len(self.msg_extension) - 5:
+            if len(self.message) > self.max_payload_size//8 - len(self.msg_extension) - 7:
                 raise Exception("Input message is too big")
         
         image.close()
@@ -110,8 +110,8 @@ class ImageStegano:
             self.message = encryptByte2(self.message, enc_key)
 
         # Start and End messages flag. 
-        flag_start_message:str = stringToBinary("<?")
-        flag_end_message:str = stringToBinary("?>")
+        flag_start_message:str = stringToBinary("<<?")
+        flag_end_message:str = stringToBinary("?>>")
 
         # File extension flag.
         flag_file_extension:str = stringToBinary(self.msg_extension)
@@ -227,16 +227,16 @@ class ImageStegano:
         for index, object in enumerate (bytes_message):
             file_extension += chr(int(object,2))
             if (chr(int(bytes_message[index+1],2)) == "<" and chr(int(bytes_message[index+2],2)) \
-                == "?"):
+                == "<" and chr(int(bytes_message[index+3],2)) == "?"):
                 break
         
         # Search for real message content.
-        start_message_index = index + 3
+        start_message_index = index + 4
         message = []
 
         for i in range(start_message_index, self.max_payload_size):
             message.append(int(bytes_message[i],2))
-            if (chr(int(bytes_message[i+1],2)) == "?" and chr(int(bytes_message[i+2],2)) == ">"):
+            if (chr(int(bytes_message[i+1],2)) == "?" and chr(int(bytes_message[i+2],2)) == ">" and chr(int(bytes_message[i+3],2)) == ">"):
                 break
         message:bytes = bytes(message)
 
